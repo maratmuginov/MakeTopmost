@@ -1,7 +1,7 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using MakeTopmost.Client.Contracts;
 
 namespace MakeTopmost.Client.Forms
 {
@@ -15,13 +15,12 @@ namespace MakeTopmost.Client.Forms
         [DllImport("user32.dll")]
         private static extern nint GetForegroundWindow();
 
-        private readonly NotifyIcon _notifyIcon;
+        private readonly ITrayIcon _trayIcon;
 
         public ShellForm()
         {
-            _notifyIcon = BuildNotifyIcon();
-            Visible = false;
-            this.Closing += OnClosing;
+            _trayIcon = new TrayIcon(this.Icon);
+            _trayIcon.ExitRequested += OnExitRequested;
 
             int alt = (int) FsModifier.Alt;
             int altShift = (int) (FsModifier.Alt | FsModifier.Shift);
@@ -31,46 +30,35 @@ namespace MakeTopmost.Client.Forms
             RegisterHotKey(this.Handle, 2, altShift, t);
         }
 
-        private NotifyIcon BuildNotifyIcon()
+        private void OnExitRequested()
         {
-            var contextMenuStrip = new ContextMenuStrip();
-            var toolStripButton = new ToolStripButton("Exit", null, OnExitClick);
-            contextMenuStrip.Items.Add(toolStripButton);
-
-            return new NotifyIcon
-            {
-                ContextMenuStrip = contextMenuStrip,
-                Visible = true,
-                Icon = Icon
-            };
-        }
-
-        private void OnExitClick(object sender, EventArgs e)
-        {
-            this.Closing -= OnClosing;
-            _notifyIcon.Dispose();
             this.Close();
             Application.Exit();
-        }
-
-        private void OnClosing(object sender, CancelEventArgs e)
-        {
-            e.Cancel = true;
-            this.Hide();
         }
 
         protected override void WndProc(ref Message m)
         {
             if (m.Msg is 0x0312)
-                SetForegroundWindowPos(new IntPtr(-m.WParam.ToInt32()));
+                RaiseHotKey(m.WParam.ToInt32());
 
             base.WndProc(ref m);
+        }
+
+        private static void RaiseHotKey(int hotKeyId)
+        {
+            var hWndInsertAfter = hotKeyId switch
+            {
+                1 => new IntPtr((int) InsertAfter.TopMost),
+                2 or _ => new IntPtr((int) InsertAfter.NoTopMost)
+            };
+            SetForegroundWindowPos(hWndInsertAfter);
         }
 
         private static void SetForegroundWindowPos(nint hWndInsertAfter)
         {
             nint activeWindowPointer = GetForegroundWindow();
-            SetWindowPos(activeWindowPointer, hWndInsertAfter, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0040);
+            uint uFlags = (uint) (SwpFlags.NoSize | SwpFlags.NoMove | SwpFlags.ShowWindow);
+            SetWindowPos(activeWindowPointer, hWndInsertAfter, 0, 0, 0, 0, uFlags);
         }
 
         [Flags]
@@ -81,6 +69,22 @@ namespace MakeTopmost.Client.Forms
             NoRepeat = 0x4000,
             Shift = 0x0004,
             Win = 0x0008
+        }
+
+        private enum InsertAfter
+        {
+            NoTopMost = -2,
+            TopMost = -1,
+            Top = 0,
+            Bottom = 1
+        }
+
+        [Flags]
+        private enum SwpFlags : uint
+        {
+            NoSize = 0x0001,
+            NoMove = 0x0002,
+            ShowWindow = 0x0040
         }
     }
 }
