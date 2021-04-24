@@ -29,12 +29,13 @@ namespace MakeTopmost.Client
             return new ServiceCollection()
                 .AddScoped<IHotKeyService, Win32HotKeyService>()
                 .AddScoped<IWindowPositioner, Win32WindowPositioner>()
-                .AddScoped<ITrayIcon, TrayIcon>(BuildTrayIcon)
+                .AddScoped<ITrayIcon, TrayIcon>()
                 .AddScoped<ShellForm>()
+                .AddScoped<Icon>(_ => CreateApplicationIcon())
                 .BuildServiceProvider();
         }
 
-        private static TrayIcon BuildTrayIcon(IServiceProvider _)
+        private static Icon CreateApplicationIcon()
         {
             var iconAssembly = Assembly.GetExecutingAssembly();
             var iconManifestResourceName = iconAssembly
@@ -49,8 +50,7 @@ namespace MakeTopmost.Client
             if (iconManifestResourceStream is null)
                 throw new Exception();
 
-            var icon = new Icon(iconManifestResourceStream);
-            return new TrayIcon(icon);
+            return new Icon(iconManifestResourceStream);
         }
     }
 }
