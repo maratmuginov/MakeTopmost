@@ -13,12 +13,12 @@ namespace MakeTopmost.Client.Wpf
         protected override void OnStartup(StartupEventArgs e)
         {
             if (AnotherInstanceExists())
-                return;
+                Shutdown();
 
             var services = ConfigureServices();
 
             var notifyIcon = services.GetRequiredService<INotifyIcon>();
-            notifyIcon.ExitRequested += OnExitRequested;
+            notifyIcon.ExitRequested += Shutdown;
 
             base.OnStartup(e);
         }
@@ -39,11 +39,6 @@ namespace MakeTopmost.Client.Wpf
             GC.KeepAlive(mutex);
 
             return createdNew is false;
-        }
-
-        private void OnExitRequested()
-        {
-            Shutdown();
         }
     }
 }
