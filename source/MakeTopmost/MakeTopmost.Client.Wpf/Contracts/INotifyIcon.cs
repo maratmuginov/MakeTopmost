@@ -1,7 +1,8 @@
-﻿namespace MakeTopmost.Client.Contracts
+﻿namespace MakeTopmost.Client.Wpf.Contracts
 {
     public delegate void ExitRequested();
-    public interface ITrayIcon
+
+    public interface INotifyIcon
     {
         event ExitRequested ExitRequested;
     }

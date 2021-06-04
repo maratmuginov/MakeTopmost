@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MakeTopmost.Client.Win32
+namespace MakeTopmost.Client.Wpf.Models
 {
     [Flags]
     public enum FsModifier

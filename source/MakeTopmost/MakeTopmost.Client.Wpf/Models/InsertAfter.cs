@@ -1,4 +1,4 @@
-﻿namespace MakeTopmost.Client.Win32
+﻿namespace MakeTopmost.Client.Wpf.Models
 {
     public enum InsertAfter
     {
