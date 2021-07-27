@@ -10,12 +10,12 @@ namespace MakeTopmost.Client.Wpf.Views
     public partial class NotifyIconView : INotifyIcon
     {
         public event ExitRequested ExitRequested;
-        private readonly IWindowPositioner _windowPositioner;
+        private readonly IWindowPosService _windowPosService;
         private readonly IHotKeyService _hotKeyService;
 
-        public NotifyIconView(IWindowPositioner windowPositioner, IHotKeyService hotKeyService)
+        public NotifyIconView(IWindowPosService windowPosService, IHotKeyService hotKeyService)
         {
-            _windowPositioner = windowPositioner;
+            _windowPosService = windowPosService;
             _hotKeyService = hotKeyService;
 
             RegisterHotKeys();
@@ -28,32 +28,32 @@ namespace MakeTopmost.Client.Wpf.Views
             WindowInteropHelper windowInteropHelper = new(this);
             nint hWnd = windowInteropHelper.EnsureHandle();
 
-            var hWndSource = HwndSource.FromHwnd(hWnd);
+            HwndSource hWndSource = HwndSource.FromHwnd(hWnd);
             hWndSource?.AddHook(WndProc);
 
-            int tKey = KeyInterop.VirtualKeyFromKey(Key.T);
+            var tKey = Convert.ToUInt32(KeyInterop.VirtualKeyFromKey(Key.T));
 
-            _hotKeyService.RegisterHotKey(hWnd, 1, FsModifier.Alt, tKey);
-            _hotKeyService.RegisterHotKey(hWnd, 2, FsModifier.Alt | FsModifier.Shift, tKey);
+            _hotKeyService.RegisterHotKey(hWnd, 1, 1, tKey);
+            _hotKeyService.RegisterHotKey(hWnd, 2, 1 | 4, tKey);
         }
 
-        private IntPtr WndProc(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        private IntPtr WndProc(nint hWnd, int msg, nint wParam, nint lParam, ref bool handled)
         {
             if (msg is 0x0312)
-                RaiseHotKey(wParam.ToInt32());
+                RaiseHotKey(Convert.ToInt32(wParam));
 
             return IntPtr.Zero;
         }
 
-        private void RaiseHotKey(int hotKeyId)
+        private void RaiseHotKey(int id)
         {
-            InsertAfter insertAfter = hotKeyId switch
+            InsertAfter insertAfter = id switch
             {
                 1 => InsertAfter.TopMost,
                 _ => InsertAfter.NoTopMost
             };
 
-            _windowPositioner.SetForegroundWindowPosition(insertAfter);
+            _windowPosService.SetForegroundWindowPosition(insertAfter);
         }
 
         private void OnExitButtonClick(object sender, RoutedEventArgs e)

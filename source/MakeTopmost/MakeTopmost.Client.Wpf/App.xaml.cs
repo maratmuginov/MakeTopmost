@@ -15,7 +15,7 @@ namespace MakeTopmost.Client.Wpf
             if (AnotherInstanceExists())
                 Shutdown();
 
-            var services = ConfigureServices();
+            IServiceProvider services = ConfigureServices();
 
             var notifyIcon = services.GetRequiredService<INotifyIcon>();
             notifyIcon.ExitRequested += Shutdown;
@@ -26,7 +26,7 @@ namespace MakeTopmost.Client.Wpf
         private static IServiceProvider ConfigureServices()
         {
             return new ServiceCollection()
-                .AddScoped<IWindowPositioner, Win32WindowPositioner>()
+                .AddScoped<IWindowPosService, Win32WindowPosService>()
                 .AddScoped<IHotKeyService, Win32HotKeyService>()
                 .AddScoped<INotifyIcon, NotifyIconView>()
                 .BuildServiceProvider();

@@ -2,7 +2,7 @@
 
 namespace MakeTopmost.Client.Wpf.Contracts
 {
-    public interface IWindowPositioner
+    public interface IWindowPosService
     {
         bool SetForegroundWindowPosition(InsertAfter insertAfter = InsertAfter.NoTopMost);
     }
