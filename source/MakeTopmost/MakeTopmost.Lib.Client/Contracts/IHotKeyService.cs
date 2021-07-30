@@ -1,4 +1,4 @@
-﻿namespace MakeTopmost.Client.Wpf.Contracts
+﻿namespace MakeTopmost.Lib.Client.Contracts
 {
     public interface IHotKeyService
     {

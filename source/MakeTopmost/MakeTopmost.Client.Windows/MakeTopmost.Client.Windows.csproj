@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="Icon.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Icon.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Vanara.PInvoke.User32" Version="3.3.11" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\MakeTopmost.Lib.Client\MakeTopmost.Lib.Client.csproj" />
+	</ItemGroup>
+
+</Project>
